@@ -1,0 +1,129 @@
+<html>
+<head>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="weibo.js"></script>
+<script>
+	var task = null;
+	var delay = 60;
+	var isSetting = false;
+	
+	/*
+	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+		console.log(tabId +":"+ changeInfo);
+	});
+	*/
+	
+	chrome.browserAction.onClicked.addListener(function(tab) {
+		goWeiboHomePage();
+	});
+	
+	function goWeiboHomePage() {
+	  chrome.tabs.getAllInWindow(undefined, function(tabs) {
+		for (var i = 0, tab; tab = tabs[i]; i++) {
+		  if (tab.url && isWeiboUrl(tab.url)) {
+			chrome.tabs.update(tab.id, {selected: true});
+			return;
+		  }
+		}
+		chrome.tabs.create({url: "http://weibo.com"});
+	  });
+	  setIconText("");
+	}
+	
+	function isWeiboUrl(url){
+		if(/^\w{4}:\/\/weibo\.com\/\d+(#\d+)?$/.test(url)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	
+	//初始化方法
+	function init(){
+		chrome.browserAction.setBadgeBackgroundColor({color:[208, 0, 24, 100]});
+		
+		clearInterval(task);
+		
+		if(!(localStorage.notices || "")) return ;
+		
+		getAuthorInfo(function(){
+			var msg = null;
+			
+			if(sessionStorage.status == -1) {	//-1 未登录
+				msg = '你暂未登录微博';
+			} else if (sessionStorage.status == 0) {	//0 未授权
+				msg = '你未授权给应用，请右键应用图标设置';
+			} else if (sessionStorage.status == 1) {	//1 已授权
+				task = setInterval(scheduling, delay * 1000);
+			} else {
+				msg = '未知错误！';
+			}
+			
+			if(msg != null) {
+				tips(msg);
+			} else if (isSetting) {
+				tips("设置成功");
+				isSetting = false;
+			}
+			
+		});
+		
+		//chrome.extension.getViews()[1].test1();   
+	}
+	
+	function scheduling(){
+		getUnreadCount(function(json){
+			if (json.error_code) {
+				clearInterval(task);
+				tips("错误！原因：1、退出微博 2、未授权");
+			} else {
+				var num = 0;
+				
+				var notices = (localStorage.notices || "").split(",");
+				for(var i in notices){
+					num += json[notices[i]]||0;
+			    }
+				
+				console.log("success");
+				if(num == 0){
+					setIconText("");
+				} else {
+					setIconText(num);
+					showNotification(num);
+				}
+				
+			}
+		});
+	}
+	
+	function showNotification(num){
+		var notification = webkitNotifications.createNotification(
+		  'icon_128.png',  
+		  '微博消息盒子提醒',  
+		  '你的微博有'+num+'条新的消息!'  
+		);
+		notification.show();
+		setTimeout(function(){notification.cancel();}, 3000);
+	}
+	
+	function tips(msg) {
+		var notification = webkitNotifications.createNotification(
+		  'icon_128.png',  
+		  '微博消息盒子提醒',  
+		  msg
+		);
+		notification.show();
+		setTimeout(function(){notification.cancel();}, 10000);
+	}
+	
+	function setIconText(number){
+		chrome.browserAction.setBadgeText({text: number.toString()});
+	}
+	
+</script>
+</head>
+<body onload="init()">
+</body>
+</html>
+

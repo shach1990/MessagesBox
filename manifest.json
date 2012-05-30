@@ -1,0 +1,18 @@
+{
+   "background_page": "background.html",
+   "browser_action": {
+      "default_icon": "icon_64.png"
+   },
+   "description": "\u65B0\u6D6A\u5FAE\u535A\u6D88\u606F\u76D2\u5B50 @WilliamSha",
+   "icons": {
+      "128": "icon_128.png",
+      "16": "icon_16.png",
+      "48": "icon_48.png",
+      "64": "icon_64.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDC9w9dl4cXPmtKmMISzwSrfL4gqGqAa/MzMBgEmEQaIXcKlkrsJsk7ofuu7eU6DER1SVSSsk2TBk3TKgvww8cY+I800uxciYXtmMxO2/S2AMM07AflGoG+MOjMYtVvp+Ru4+8WOh3dXfM69garcX8ErIWpDxC/QqWKkXEOuCsKNQIDAQAB",
+   "name": "\u65B0\u6D6A\u5FAE\u535A\u6D88\u606F\u76D2\u5B50",
+   "options_page": "options.html",
+   "permissions": [ "tabs", "http://rm.api.weibo.com/*", "https://api.t.sina.com.cn/*", "notifications" ],
+   "version": "0.1.2"
+}

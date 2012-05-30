@@ -1,0 +1,167 @@
+<html>
+<head>
+<title>新浪微博消息盒子 - Options</title>
+<style>
+body {
+  font-family:helvetica, arial, sans-serif;
+  font-size:80%;
+  margin:10px;
+}
+
+#header {
+  padding-bottom:1.5em;
+  padding-top:1.5em;
+}
+
+#header h1 {
+  font-size: 156%;
+  display:inline;
+  padding-bottom:43px;
+  padding-left:75px;
+  padding-top:40px;
+  background:url(icon_128.png) no-repeat;
+  background-size:67px;
+  background-position:1px 18px;
+}
+
+.section-header {
+  background:#ebeff9;
+  border-top:1px solid #b5c7de;
+  font-size:99%;
+  padding:3px 0 2px 5px;
+  font-weight:bold;
+  margin-bottom:1em;
+  margin-top:4em;
+}
+
+.section-header.first {
+  margin-top:1em;
+}
+
+#custom-domain, #custom-delay {
+   border: 1px solid #666666;
+   margin-left: 2px;
+   width: 30px;
+}
+#custom-domain {
+	width: 200px;
+}
+#footer {
+  margin-top:4em;
+}
+iframe {
+	float: right;
+	width: 600px;
+	height: 420px;
+	border: 1px #666 solid;
+}
+.author {
+	float: right;
+}
+</style>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=3551059820" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<div id="header"><h1>新浪微博消息盒子 By @WilliamSha</h1></div>
+
+<div class="section-header first"><span class="author">点击下方授权按钮，授权后刷新页面即可使用。</span>新浪微博提示设置<small style="font-weight: 100;font-size: 12px;">(不勾选不提示)</small></div>
+<iframe src="https://api.t.sina.com.cn/oauth2/authorize?client_id=3551059820&response_type=token&display=js&redirect_uri=https://api.t.sina.com.cn/xd.html" onload="authorize()"></iframe>
+<p>
+	<input type="checkbox" name="notice" value="status" />新微博未读数
+	<br/>
+	<input type="checkbox" name="notice" value="follower" />新粉丝数
+	<br/>
+	<input type="checkbox" name="notice" value="cmt" />新评论数
+	<br/>
+	<input type="checkbox" name="notice" value="dm" />新私信数
+	<br/>
+	<input type="checkbox" name="notice" value="mention_status" />新提及我的微博数
+	<br/>
+	<input type="checkbox" name="notice" value="mention_cmt" />新提及我的评论数
+	<br/>
+	<input type="checkbox" name="notice" value="group" />微群消息未读数
+	<br/>
+	<input type="checkbox" name="notice" value="private_group" />私有微群消息未读数
+	<br/>
+	<input type="checkbox" name="notice" value="notice" />新通知未读数
+	<br/>
+	<input type="checkbox" name="notice" value="invite" />新邀请未读数
+	<br/>
+	<input type="checkbox" name="notice" value="badge" />新勋章数
+	<br/>
+	<input type="checkbox" name="notice" value="photo" />相册消息未读数
+ </p>
+<div id="footer">
+  <button id="save-button" style="font-weight:bold" onclick="save()"
+    >Save</button>
+  <button onclick="init()">Cancel</button>
+</div>
+<h3>作者:  <a href="http://weibo.com/shacaihong" target="_blank" style="color: #666;">@WilliamSha<a/> 微博<img src="LOGO_24x24.png" /></h3>
+<script>
+var notices;
+var saveButton;
+var author_url = "https://api.t.sina.com.cn/oauth2/authorize?client_id=3551059820&response_type=token&display=js&redirect_uri=https://api.t.sina.com.cn/xd.html";
+
+init();
+
+function authorize(){
+	if(WB2.checkLogin()) {
+		$("iframe").fadeOut(function(){$(this).remove();});
+		$(".author").text("授权成功，可正常使用").css("color", "red");
+	} else {
+		$.get(author_url,
+			function(data) {
+				if (typeof(data) == 'object') {
+					location.reload();
+				}
+			}
+		);
+	}
+}
+
+function init() {
+  notices = (localStorage.notices || "").split(",");
+  saveButton = document.getElementById("save-button");
+  
+  for(var i in notices){
+      $("input[value="+notices[i]+"]").attr("checked", true);
+  }
+  
+  $("input:checkbox").change(function(){markDirty();});
+  
+  markClean();  
+}
+
+function save() {
+  if (!WB2.checkLogin()) {
+	 alert(unescape("%u4F60%u5C1A%u672A%u8FDB%u884C%u5FAE%u535A%u6388%u6743"));
+	 $("iframe").attr("src", author_url);
+	 return ;
+  }
+  
+  var array = [];
+  $("input:checked").each(function(a, b){
+      array[a] = b.value;
+  });
+
+  notices = array.join(",");
+  localStorage.notices = notices;
+  
+  markClean();
+
+  chrome.extension.getBackgroundPage().isSetting = true;
+  chrome.extension.getBackgroundPage().init();
+}
+
+function markDirty() {
+  saveButton.disabled = false;
+}
+
+function markClean() {
+  saveButton.disabled = true;
+}
+</script>
+</body>
+</html>
